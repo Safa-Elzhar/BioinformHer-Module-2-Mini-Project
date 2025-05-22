@@ -132,4 +132,11 @@ tree <- nj(dist_matrix)
 
 # Plot the tree
 plot(tree, main = "Phylogenetic Tree of HBB Sequences", type = "phylogram")
+##The phylogenetic tree based on hemoglobin beta (HBB) gene sequences reflects
+#evolutionary relationships among vertebrates. 
+# Human (NP\_000509.1) and chimpanzee (XP\_508242.1) sequences cluster closely, indicating their recent common ancestry and high genetic similarity.
+#Mouse (ADD52650.1) and cow (NP\_776342.1), as fellow mammals, form a separate clade, sharing a more distant common ancestor with primates. 
+#Chicken (AAA48996.1), representing birds, diverges earlier from the mammalian lineage.
+# while zebrafish, a fish species, branches off even earlier, highlighting its more distant relationship to the other vertebrates.
+#This arrangement underscores the progressive divergence of species from a common ancestor, consistent with evolutionary theory.
 
