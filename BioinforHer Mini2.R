@@ -1,0 +1,141 @@
+# Step 1: Install and Load Required R Packages
+#Step 1: Install and Load Required R Packages
+# Install from CRAN/Bioconductor
+install.packages("rentrez")
+# Load the libraries
+library(rentrez)
+library(Biostrings)
+
+
+# Step 2: Retrieve Human HBB Gene Sequence from NCBI
+# We can search for the HBB gene using its gene ID (3043) or accession number NM_000518 (mRNA) or NP_000509 (protein).
+## Retrieve the nucleotide (mRNA) sequence
+hbb_nuc <- entrez_fetch(db = "nuccore", id = "NM_000518", rettype = "fasta")
+# print sequence
+cat(hbb_nuc)
+## Retrieve the protein sequence
+# Human
+hbb_human <- entrez_fetch(db = "protein", id = "NP_000509", rettype = "fasta")
+
+# Chimpanzee
+hbb_chimp <- entrez_fetch(db = "protein", id = "NP_001009242.1", rettype = "fasta")
+
+# Cow
+hbb_cow <- entrez_fetch(db = "protein", id = "NP_776342.1", rettype = "fasta")
+
+# Mouse
+hbb_mouse <- entrez_fetch(db = "protein", id = "NP_034580.1", rettype = "fasta")
+
+# Chicken
+hbb_chicken <- entrez_fetch(db = "protein", id = "NP_990370.1", rettype = "fasta")
+
+# Zebrafish
+hbb_zebrafish <- entrez_fetch(db = "protein", id = "NP_571689.1", rettype = "fasta")
+
+# print sequence
+cat(hbb_protein)
+## Step 3: Save the Sequence to a FASTA File 
+writeLines(hbb_nuc, "HBB_human_mRNA.fasta")
+writeLines(hbb_human, "HBB_human.fasta")
+writeLines(hbb_chimp, "HBB_chimp_protein.fasta")
+writeLines(hbb_cow, "HBB_cow_protein.fasta")
+writeLines(hbb_mouse, "HBB_mouse_protein.fasta")
+writeLines(hbb_chicken, "HBB_chicken_protein.fasta")
+writeLines(hbb_zebrafish, "HBB_zebrafish_protein.fasta")
+
+##  Step 4: Read the sequences 
+human <- readAAStringSet("HBB_human.fasta")
+chimp <- readAAStringSet("HBB_chimpanzee.fasta")
+zfish <- readAAStringSet("HBB_zebrafish.fasta")
+
+##  Step 5: Perform pairwise alignments
+
+# Human vs Chimpanzee
+alignment1 <- pairwiseAlignment(human[[1]], chimp[[1]], substitutionMatrix = "BLOSUM62", gapOpening = -10, gapExtension = -0.5)
+
+# Human vs Zebrafish
+alignment2 <- pairwiseAlignment(human[[1]], zfish[[1]], substitutionMatrix = "BLOSUM62", gapOpening = -10, gapExtension = -0.5)
+
+##  Step 6: View results
+# Show alignment summaries
+alignment1
+alignment2
+
+# Show percent identity
+pid1 <- pid(alignment1)
+pid2 <- pid(alignment2)
+
+cat("Human vs Chimpanzee % Identity:", pid1, "%\n")
+cat("Human vs Zebrafish % Identity:", pid2, "%\n")
+### Interpretation
+Human vs. Chimpanzee: 
+The 100% identity and similarity with no gaps indicate complete conservation of the HBB protein
+between humans and chimpanzees.
+This reflects their close evolutionary relationship and the essential function of hemoglobin beta 
+in oxygen transport.
+
+Human vs. Zebrafish: 
+The lower identity (51.35%) and similarity (65.0%) with multiple gaps suggest significant divergence 
+in the HBB protein sequence. This is expected due to the greater evolutionary distance between 
+humans and zebrafish, leading to variations in the hemoglobin structure and function.
+
+BiocManager::install("msa") 
+library(msa)
+
+human <- readAAStringSet("HBB_human.fasta")
+chimp <- readAAStringSet("HBB_chimpanzee.fasta")
+cow <- readAAStringSet("HBB_cow.fasta")
+mouse <- readAAStringSet("HBB_mouse.fasta")
+chicken <- readAAStringSet("HBB_chicken.fasta")
+zebrafish <- readAAStringSet("HBB_zebrafish.fasta")
+
+sequences <- c(human, chimp, cow, mouse, chicken, zebrafish)
+alignment <- msa(sequences, method = "ClustalOmega")
+print(alignment, show = "alignment")
+# Save the Alignment to a File
+writeXStringSet(unmasked(alignment), filepath = "HBB_alignment.fasta")
+#Visualize the Alignment as pdf
+install.packages("tinytex")
+tinytex::install_tinytex()
+library(tinytex)
+
+msaPrettyPrint(alignment,
+               output = "pdf",
+               showNames = "left",
+               showLogo = "top",
+               askForOverwrite = FALSE,
+               verbose = FALSE,
+               file = "HBB_alignment.pdf")
+
+
+#Constructing a Phylogenetic Tree in R
+install.packages("ape")
+install.packages("phangorn")
+install.packages("ggtree")    # For visualization (requires Bioconductor)
+install.packages("ggplot2")   # For plotting
+
+library(ape)
+library(phangorn)
+library(ggtree)
+library(ggplot2)
+
+## step 7 Convert Alignment for Phylogenetic Analysis
+##Convert the alignment to a format suitable for distance calculation:
+
+
+# Convert alignment to a matrix
+alignment_matrix <- as.matrix(alignment)
+
+# Convert to DNAbin object
+alignment_dnabin <- as.DNAbin(alignment_matrix)
+
+##Compute Distance Matrix
+#Calculate the pairwise distances between sequences:
+dist_matrix <- dist.dna(alignment_dnabin, model = "raw")
+
+# Build the tree
+tree <- nj(dist_matrix)
+
+# Plot the tree
+plot(tree, main = "Phylogenetic Tree of HBB Sequences", type = "phylogram")
+
